@@ -17,6 +17,12 @@ const inputCiudad = document.getElementById('inputCiudad');
 const resultado = document.getElementById('resultado');
 const estado = document.getElementById('estado');
 
+navigator.geolocation.getCurrentPosition(async (posicion) => { 
+            const lat = posicion.coords.latitude; 
+            const lon = posicion.coords.longitude; 
+// Consultar API con lat y lon 
+}); 
+
 
 // ============================================
 // FUNCIÓN PRINCIPAL: CONSULTAR CLIMA
