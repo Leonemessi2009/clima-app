@@ -17,6 +17,8 @@ const resultado = document.getElementById('resultado');
 const estado = document.getElementById('estado');
 const pronostico = document.getElementById('pronostico');
 const btnWhatsApp = document.getElementById('btnWhatsApp');
+const historial = document.getElementById('historial');
+const btnTema = document.getElementById('btnTema');
 
 
 // ============================================
@@ -43,6 +45,10 @@ document.getElementById('btnUbicacion').addEventListener('click', () => {
 
 });
 
+btnTema.addEventListener('click', () => {
+    document.body.classList.toggle('claro');
+});
+
 
 // ============================================
 // FUNCIÓN PRINCIPAL: CONSULTAR CLIMA
@@ -56,7 +62,8 @@ async function consultarClima(ciudad) {
 
     try {
 
-        const ciudadCodificada = encodeURIComponent(ciudad);
+        const ciudadCodificada =
+            encodeURIComponent(ciudad);
 
         const url =
             `${API_URL}?q=${ciudadCodificada}&appid=${API_KEY}&units=metric&lang=es`;
@@ -106,7 +113,8 @@ async function consultarClima(ciudad) {
 
 async function consultarPronostico(ciudad) {
 
-    const ciudadCodificada = encodeURIComponent(ciudad);
+    const ciudadCodificada =
+        encodeURIComponent(ciudad);
 
     const url =
         `https://api.openweathermap.org/data/2.5/forecast?q=${ciudadCodificada}&appid=${API_KEY}&units=metric&lang=es`;
@@ -132,7 +140,8 @@ function mostrarPronostico(datos) {
 
         if (index % 8 === 0) {
 
-            const fecha = new Date(item.dt * 1000);
+            const fecha =
+                new Date(item.dt * 1000);
 
             const temperatura =
                 Math.round(item.main.temp);
@@ -178,26 +187,71 @@ function mostrarPronostico(datos) {
 
 
 // ============================================
+// FUNCIÓN: GUARDAR HISTORIAL
+// ============================================
+
+function guardarHistorial(ciudad) {
+
+    let historialGuardado =
+        JSON.parse(localStorage.getItem('historial')) || [];
+
+    historialGuardado.push(ciudad);
+
+    historialGuardado =
+        historialGuardado.slice(-5);
+
+    localStorage.setItem(
+        'historial',
+        JSON.stringify(historialGuardado)
+    );
+
+    mostrarHistorial();
+}
+
+
+// ============================================
+// FUNCIÓN: MOSTRAR HISTORIAL
+// ============================================
+
+function mostrarHistorial() {
+
+    let historialGuardado =
+        JSON.parse(localStorage.getItem('historial')) || [];
+
+    historial.innerHTML =
+        '<h3>Últimas búsquedas</h3>';
+
+    historialGuardado.forEach((ciudad) => {
+
+        const boton =
+            document.createElement('button');
+
+        boton.textContent = ciudad;
+
+        boton.addEventListener('click', () => {
+
+            consultarClima(ciudad);
+
+            consultarPronostico(ciudad);
+
+        });
+
+        historial.appendChild(boton);
+    });
+}
+
+
+// ============================================
 // FUNCIÓN: MOSTRAR EL CLIMA EN EL DOM
 // ============================================
 
 function mostrarClima(datos) {
-    btnWhatsApp.addEventListener('click', () => {
 
-        const ciudad = document.querySelector('.ciudad').textContent;
-        const temperatura = document.querySelector('.temperatura').textContent;
+    const ciudad =
+        datos.name;
 
-        const mensaje =
-            `El clima en ${ciudad} es de ${temperatura}`;
-
-        const url =
-            `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-
-        window.open(url, '_blank');
-    });
-
-    const ciudad = datos.name;
-    const pais = datos.sys.country;
+    const pais =
+        datos.sys.country;
 
     const temperatura =
         Math.round(datos.main.temp);
@@ -259,6 +313,7 @@ function mostrarClima(datos) {
         <div class="detalles">
 
             <div class="detalle">
+
                 <div class="etiqueta">
                     Sensación
                 </div>
@@ -266,9 +321,11 @@ function mostrarClima(datos) {
                 <div class="valor">
                     ${sensacion}°C
                 </div>
+
             </div>
 
             <div class="detalle">
+
                 <div class="etiqueta">
                     Humedad
                 </div>
@@ -276,9 +333,11 @@ function mostrarClima(datos) {
                 <div class="valor">
                     ${humedad}%
                 </div>
+
             </div>
 
             <div class="detalle">
+
                 <div class="etiqueta">
                     Presión
                 </div>
@@ -286,9 +345,11 @@ function mostrarClima(datos) {
                 <div class="valor">
                     ${presion} hPa
                 </div>
+
             </div>
 
             <div class="detalle">
+
                 <div class="etiqueta">
                     Viento
                 </div>
@@ -296,6 +357,7 @@ function mostrarClima(datos) {
                 <div class="valor">
                     ${viento} m/s
                 </div>
+
             </div>
 
         </div>
@@ -375,6 +437,29 @@ function cambiarFondoSegunClima(clima) {
 
 
 // ============================================
+// BOTÓN: COMPARTIR EN WHATSAPP
+// ============================================
+
+btnWhatsApp.addEventListener('click', () => {
+
+    const ciudad =
+        document.querySelector('.ciudad').textContent;
+
+    const temperatura =
+        document.querySelector('.temperatura').textContent;
+
+    const mensaje =
+        `El clima en ${ciudad} es de ${temperatura}`;
+
+    const url =
+        `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+
+    window.open(url, '_blank');
+
+});
+
+
+// ============================================
 // EVENTO DEL FORMULARIO
 // ============================================
 
@@ -396,6 +481,9 @@ formulario.addEventListener('submit', (e) => {
     consultarClima(ciudad);
 
     consultarPronostico(ciudad);
+
+    guardarHistorial(ciudad);
+
 });
 
 
@@ -405,6 +493,13 @@ formulario.addEventListener('submit', (e) => {
 
 estado.textContent =
     'Escribe una ciudad y presiona "Consultar".';
+
+
+// ============================================
+// MOSTRAR HISTORIAL AL CARGAR
+// ============================================
+
+mostrarHistorial();
 
 
 // ============================================

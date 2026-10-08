@@ -233,3 +233,20 @@ footer {
     }
 }
 
+body.claro {
+    background: linear-gradient(135deg, #f5f5f5, #dcdcdc);
+    color: #222222;
+}
+
+body.claro header p {
+    color: #444444;
+}
+
+body.claro #estado {
+    color: #444444;
+}
+
+body.claro footer {
+    color: #555555;
+}
+
